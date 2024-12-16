@@ -1,9 +1,9 @@
 <template>
-  <div id="app" class="bg-red-500">
+  <div id="app">
     <WordPressPosts />
   </div>
 </template>
 
 <script setup lang="ts">
-  import WordPressPosts from "./components/WordPressPosts.vue";
+  import WordPressPosts from "./components/PostComments.vue";
 </script>
