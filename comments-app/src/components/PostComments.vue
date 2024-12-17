@@ -3,8 +3,14 @@
     <div class="flex flex-col gap-6 bg-sky-50 px-6 py-8">
       <h1 class="text-4xl font-bold">Comments</h1>
 
+      <NotFound v-if="!comments.length" />
+
       <div class="flex flex-col gap-4">
-        <div v-for="(comment, key) in comments" :key="key">
+        <div
+          v-if="comments.length > 0"
+          v-for="(comment, key) in comments"
+          :key="key"
+        >
           <div
             class="flex w-2/5 flex-col gap-2 rounded-3xl border border-emerald-50 bg-emerald-100 px-8 py-3"
           >
@@ -41,7 +47,7 @@
               <div class="flex items-center justify-between">
                 <button
                   class="rounded-md bg-red-400 px-2 py-1 text-sm leading-5 text-white"
-                  @click="useDelete(comment.id)"
+                  @click="deleteAndFetchData(comment.id)"
                 >
                   Delete
                 </button>
@@ -53,6 +59,30 @@
           </div>
         </div>
       </div>
+
+      <div
+        v-if="isModalOpen"
+        class="fixed inset-0 z-10 flex items-center justify-center"
+      >
+        <div
+          class="absolute inset-0 bg-gray-900 bg-opacity-50 backdrop-blur-sm"
+        />
+        <dialog open class="z-20 rounded-3xl p-10">
+          <div class="flex flex-col gap-5">
+            <div class="flex flex-col">
+              <span class="text-xl font-semibold">
+                The comment has been deleted successfully.
+              </span>
+              <span class="mt-2 text-sm"
+                >You can now continue with other actions.
+              </span>
+            </div>
+            <button class="bg-sky-400 px-4 py-2" @click="isModalOpen = false">
+              Close
+            </button>
+          </div>
+        </dialog>
+      </div>
     </div>
   </div>
 </template>
@@ -63,10 +93,12 @@
 
   import { useDelete, useFetch } from "../hooks/useCommentActions.vue";
   import { Comment } from "../vite-env";
+  import NotFound from "./NotFound.vue";
 
   const comments = ref<Comment[]>([]);
 
   const isExpanded = ref<Record<number, boolean>>({});
+  const isModalOpen = ref(false);
 
   const isTruncated = (text: string): boolean => {
     return text.length > 180;
@@ -86,6 +118,16 @@
       post_id: 64,
     },
   });
+
+  const deleteAndFetchData = async (id: number) => {
+    try {
+      isModalOpen.value = true;
+      await useDelete(id);
+      fetchData();
+    } catch (error) {
+      console.error("Error deleting comment:", error);
+    }
+  };
 
   onMounted(() => {
     fetchData();

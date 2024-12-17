@@ -39,7 +39,6 @@
           },
         }
       );
-      console.log("Response: ", response);
     } catch (err) {
       console.error("Error: ", err);
     }
