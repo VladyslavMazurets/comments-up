@@ -77,3 +77,35 @@ function get_comments_for_post() {
 
 add_action('wp_ajax_get_comments', 'get_comments_for_post');
 add_action('wp_ajax_nopriv_get_comments', 'get_comments_for_post');
+
+function delete_comment() {
+    // Перевіряємо, чи є ID коментаря
+    if (!isset($_POST['comment_id']) || empty($_POST['comment_id'])) {
+        wp_send_json_error(array('message' => 'Comment ID is required.'));
+        return;
+    }
+
+    $comment_id = intval($_POST['comment_id']); // Приведення до цілого числа
+
+    // Перевіряємо, чи існує коментар
+    $comment = get_comment($comment_id);
+    if (!$comment) {
+        wp_send_json_error(array('message' => 'Comment not found.'));
+        return;
+    }
+
+    // Видаляємо коментар
+    $result = wp_delete_comment($comment_id, true); // true означає примусове видалення
+    if ($result) {
+        wp_send_json_success(array('message' => 'Comment deleted successfully.'));
+    } else {
+        wp_send_json_error(array('message' => 'Error occurred while deleting the comment.'));
+    }
+}
+
+// Реєструємо обробник AJAX для авторизованих і неавторизованих користувачів
+add_action('wp_ajax_delete_comment', 'delete_comment');
+add_action('wp_ajax_nopriv_delete_comment', 'delete_comment');
+
+
+

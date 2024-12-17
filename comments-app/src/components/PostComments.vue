@@ -4,7 +4,7 @@
       <h1 class="text-4xl font-bold">Comments</h1>
 
       <div class="flex flex-col gap-4">
-        <div v-for="(comment, key) in comments" :key="key">
+        <div v-for="(comment, key) in data" :key="key">
           <div
             class="flex w-2/5 flex-col gap-2 rounded-3xl border border-emerald-50 bg-emerald-100 px-8 py-3"
           >
@@ -20,7 +20,7 @@
               </a>
             </div>
 
-            <div class="flex flex-col gap-2">
+            <div class="flex flex-col gap-6">
               <div>
                 <span class="text-base">
                   {{
@@ -37,9 +37,18 @@
                   {{ isExpanded[key] ? "Show less" : "Show more" }}
                 </button>
               </div>
-              <span class="ml-auto text-sm">
-                {{ dayjs(comment.date).format("DD-MM-YYYY") }}
-              </span>
+
+              <div class="flex items-center justify-between">
+                <button
+                  class="rounded-md bg-red-400 px-2 py-1 text-sm leading-5 text-white"
+                  @click="deleteComment(comment.id)"
+                >
+                  Delete
+                </button>
+                <span class="ml-auto text-sm">
+                  {{ dayjs(comment.date).format("DD-MM-YYYY") }}
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -49,33 +58,23 @@
 </template>
 
 <script setup lang="ts">
-  import axios from "axios";
   import dayjs from "dayjs";
   import { onMounted, ref } from "vue";
 
+  import { useFetch } from "../hooks/useFetch.vue";
   import { Comment } from "../vite-env";
 
   const comments = ref<Comment[]>([]);
+  const basicUrl = "http://localhost:8888/upwordpress/wp-admin/admin-ajax.php";
 
   const isExpanded = ref<Record<number, boolean>>({});
 
-  const fetchComments = async () => {
-    await axios
-      .get(
-        "http://localhost:8888/upwordpress/wp-admin/admin-ajax.php?action=get_comments&post_id=1",
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      )
-      .then((response) => {
-        comments.value = response.data.data;
-      })
-      .catch((error) => {
-        console.error("Error fetching comments:", error);
-      });
-  };
+  const { data, error, loading, fetchData } = useFetch(basicUrl, {
+    params: {
+      action: "get_comments",
+      post_id: 1,
+    },
+  });
 
   const isTruncated = (text: string): boolean => {
     return text.length > 180;
@@ -90,6 +89,6 @@
   };
 
   onMounted(() => {
-    fetchComments();
+    fetchData();
   });
 </script>
