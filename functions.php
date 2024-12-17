@@ -100,9 +100,50 @@ function delete_comment() {
     }
 }
 
-// Реєстрація обробника для AJAX запиту
 add_action('wp_ajax_delete_comment', 'delete_comment');  // Для авторизованих користувачів
 add_action('wp_ajax_nopriv_delete_comment', 'delete_comment');  // Для неавторизованих користувачів
+
+function custom_add_comment() {
+    // Перевірка, чи всі необхідні параметри присутні
+    if (!isset($_POST['options']) || empty($_POST['options'])) {
+        wp_send_json_error(['message' => 'Missing options parameter']);
+        return;
+    }
+
+    $options = $_POST['options'];
+    $comment_content = sanitize_text_field($options['content']);
+    $comment_author = sanitize_text_field($options['name']);
+    $post_id = intval($_POST['post_id']);
+
+    // Перевірка, чи пост з таким ID існує
+    if (!get_post($post_id)) {
+        wp_send_json_error(['message' => 'Invalid post ID']);
+        return;
+    }
+
+    // Підготовка даних для коментаря
+    $commentdata = array(
+        'comment_post_ID' => $post_id,        // ID поста, до якого додається коментар
+        'comment_content' => $comment_content, // Текст коментаря
+        'comment_author' => $comment_author,   // Ім'я автора
+        'comment_author_IP' => $_SERVER['REMOTE_ADDR'], // IP адреса користувача
+        'comment_date' => current_time('mysql'),       // Час додавання коментаря
+        'comment_approved' => 1,             // Коментар відразу затверджується
+    );
+
+    // Додавання коментаря в базу даних
+    $comment_id = wp_insert_comment($commentdata);
+
+    if ($comment_id) {
+        wp_send_json_success(['message' => 'Comment added successfully']);
+    } else {
+        wp_send_json_error(['message' => 'Failed to add comment']);
+    }
+}
+add_action('wp_ajax_submit_comment', 'custom_add_comment');
+add_action('wp_ajax_nopriv_submit_comment', 'custom_add_comment'); // Дозволяє додавати коментарі для анонімних користувачів
+
+
 
 
 

@@ -43,4 +43,46 @@
       console.error("Error: ", err);
     }
   };
+
+  export const useSubmitComment = () => {
+    const isSubmitting = ref(false);
+    const errorMessage = ref<string | null>(null);
+
+    const submitComment = async (postId: number, options: any) => {
+      isSubmitting.value = true;
+      errorMessage.value = null;
+
+      try {
+        const response = await axios.post(
+          basicUrl,
+          {
+            action: "submit_comment",
+            post_id: postId,
+            options,
+          },
+          {
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+          }
+        );
+
+        console.log("Comment submitted successfully", response.data);
+
+        return response.data;
+      } catch (error) {
+        console.error("Error submitting comment:", error);
+        errorMessage.value =
+          "There was an error submitting your comment. Please try again.";
+      } finally {
+        isSubmitting.value = false;
+      }
+    };
+
+    return {
+      isSubmitting,
+      errorMessage,
+      submitComment,
+    };
+  };
 </script>
