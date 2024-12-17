@@ -4,7 +4,7 @@
       <h1 class="text-4xl font-bold">Comments</h1>
 
       <div class="flex flex-col gap-4">
-        <div v-for="(comment, key) in data" :key="key">
+        <div v-for="(comment, key) in comments" :key="key">
           <div
             class="flex w-2/5 flex-col gap-2 rounded-3xl border border-emerald-50 bg-emerald-100 px-8 py-3"
           >
@@ -59,22 +59,14 @@
 
 <script setup lang="ts">
   import dayjs from "dayjs";
-  import { onMounted, ref } from "vue";
+  import { onBeforeMount, onMounted, ref, watchEffect } from "vue";
 
-  import { useFetch } from "../hooks/useFetch.vue";
+  import { useFetch } from "../hooks/useCommentActions.vue";
   import { Comment } from "../vite-env";
 
   const comments = ref<Comment[]>([]);
-  const basicUrl = "http://localhost:8888/upwordpress/wp-admin/admin-ajax.php";
 
   const isExpanded = ref<Record<number, boolean>>({});
-
-  const { data, error, loading, fetchData } = useFetch(basicUrl, {
-    params: {
-      action: "get_comments",
-      post_id: 1,
-    },
-  });
 
   const isTruncated = (text: string): boolean => {
     return text.length > 180;
@@ -88,7 +80,20 @@
     isExpanded.value[key] = !isExpanded.value[key];
   };
 
+  const { data, error, fetchData } = useFetch({
+    params: {
+      action: "get_comments",
+      post_id: 1,
+    },
+  });
+
   onMounted(() => {
     fetchData();
+  });
+
+  watchEffect(() => {
+    if (data.value) {
+      comments.value = data.value;
+    }
   });
 </script>
