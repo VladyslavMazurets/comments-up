@@ -60,29 +60,10 @@
         </div>
       </div>
 
-      <div
-        v-if="isModalOpen"
-        class="fixed inset-0 z-10 flex items-center justify-center"
-      >
-        <div
-          class="absolute inset-0 bg-gray-900 bg-opacity-50 backdrop-blur-sm"
-        />
-        <dialog open class="z-20 rounded-3xl p-10">
-          <div class="flex flex-col gap-5">
-            <div class="flex flex-col">
-              <span class="text-xl font-semibold">
-                The comment has been deleted successfully.
-              </span>
-              <span class="mt-2 text-sm"
-                >You can now continue with other actions.
-              </span>
-            </div>
-            <button class="bg-sky-400 px-4 py-2" @click="isModalOpen = false">
-              Close
-            </button>
-          </div>
-        </dialog>
-      </div>
+      <DeleteModal
+        :isModalOpen="isModalOpen"
+        @closeModal="isModalOpen = false"
+      />
     </div>
   </div>
 </template>
@@ -93,6 +74,7 @@
 
   import { useDelete, useFetch } from "../hooks/useCommentActions.vue";
   import { Comment } from "../vite-env";
+  import DeleteModal from "./DeleteModal.vue";
   import NotFound from "./NotFound.vue";
 
   const comments = ref<Comment[]>([]);
