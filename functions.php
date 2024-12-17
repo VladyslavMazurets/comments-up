@@ -1,24 +1,22 @@
 <?php
 
 function add_cors_headers() {
-    // Перевірка, чи є заголовок Origin у запиті
+    // Дозволяємо доступ з вашого локального фронтенду
     if (isset($_SERVER['HTTP_ORIGIN']) && $_SERVER['HTTP_ORIGIN'] === 'http://localhost:5173') {
         header("Access-Control-Allow-Origin: http://localhost:5173");
-        header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-        header("Access-Control-Allow-Headers: Content-Type");
+        header("Access-Control-Allow-Methods: POST, DELETE, OPTIONS");
+        header("Access-Control-Allow-Headers: Content-Type, X-Requested-With, Authorization");
     }
 
-    // Для запитів типу OPTIONS (для попереднього запиту CORS)
     if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-        header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-        header('Access-Control-Allow-Headers: Content-Type');
-        exit(0); // Виходимо після обробки OPTIONS запиту
+        header('Access-Control-Allow-Methods: POST, DELETE, OPTIONS');
+        header('Access-Control-Allow-Headers: Content-Type, X-Requested-With, Authorization');
+        exit(0);
     }
 }
 
 add_action('init', 'add_cors_headers');
 
-// Функція для підключення скриптів і стилів Vue.js
 function enqueue_vue_comments_app() {
     if (is_page_template('comments-page-template.php')) {
         
@@ -79,22 +77,21 @@ add_action('wp_ajax_get_comments', 'get_comments_for_post');
 add_action('wp_ajax_nopriv_get_comments', 'get_comments_for_post');
 
 function delete_comment() {
-    // Перевіряємо, чи є ID коментаря
-    if (!isset($_POST['comment_id']) || empty($_POST['comment_id'])) {
+    if (!isset($_POST['id']) || empty($_POST['id'])) {
         wp_send_json_error(array('message' => 'Comment ID is required.'));
         return;
     }
 
-    $comment_id = intval($_POST['comment_id']); // Приведення до цілого числа
+    $comment_id = intval($_POST['id']); // Приведення до цілого числа
 
-    // Перевіряємо, чи існує коментар
+    // Перевірка чи існує коментар
     $comment = get_comment($comment_id);
     if (!$comment) {
         wp_send_json_error(array('message' => 'Comment not found.'));
         return;
     }
 
-    // Видаляємо коментар
+    // Видалення коментаря
     $result = wp_delete_comment($comment_id, true); // true означає примусове видалення
     if ($result) {
         wp_send_json_success(array('message' => 'Comment deleted successfully.'));
@@ -103,9 +100,10 @@ function delete_comment() {
     }
 }
 
-// Реєструємо обробник AJAX для авторизованих і неавторизованих користувачів
-add_action('wp_ajax_delete_comment', 'delete_comment');
-add_action('wp_ajax_nopriv_delete_comment', 'delete_comment');
+// Реєстрація обробника для AJAX запиту
+add_action('wp_ajax_delete_comment', 'delete_comment');  // Для авторизованих користувачів
+add_action('wp_ajax_nopriv_delete_comment', 'delete_comment');  // Для неавторизованих користувачів
+
 
 
 

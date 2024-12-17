@@ -24,4 +24,24 @@
       fetchData,
     };
   };
+
+  export const useDelete = async (id: string) => {
+    try {
+      const response = await axios.post(
+        basicUrl,
+        {
+          action: "delete_comment",
+          id: id,
+        },
+        {
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+        }
+      );
+      console.log("Response: ", response);
+    } catch (err) {
+      console.error("Error: ", err);
+    }
+  };
 </script>

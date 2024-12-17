@@ -41,7 +41,7 @@
               <div class="flex items-center justify-between">
                 <button
                   class="rounded-md bg-red-400 px-2 py-1 text-sm leading-5 text-white"
-                  @click="deleteComment(comment.id)"
+                  @click="useDelete(comment.id)"
                 >
                   Delete
                 </button>
@@ -59,9 +59,9 @@
 
 <script setup lang="ts">
   import dayjs from "dayjs";
-  import { onBeforeMount, onMounted, ref, watchEffect } from "vue";
+  import { onMounted, ref, watchEffect } from "vue";
 
-  import { useFetch } from "../hooks/useCommentActions.vue";
+  import { useDelete, useFetch } from "../hooks/useCommentActions.vue";
   import { Comment } from "../vite-env";
 
   const comments = ref<Comment[]>([]);
@@ -83,7 +83,7 @@
   const { data, error, fetchData } = useFetch({
     params: {
       action: "get_comments",
-      post_id: 1,
+      post_id: 64,
     },
   });
 
