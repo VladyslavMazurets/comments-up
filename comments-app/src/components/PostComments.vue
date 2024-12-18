@@ -31,7 +31,7 @@
                   }}
                 </span>
                 <button
-                  class="ml-2 text-sm text-sky-500 hover:underline"
+                  class="text-sm text-sky-500 hover:underline"
                   v-if="isTruncated(comment.content)"
                   @click="toggleExpanded(key)"
                 >
@@ -58,6 +58,7 @@
 
       <DeleteModal
         :isModalOpen="isModalOpen"
+        :deletedCommentAuthor="deletedCommentAuthor"
         @closeModal="isModalOpen = false"
       />
     </div>
@@ -75,6 +76,7 @@
   import NotFound from "./NotFound.vue";
 
   const comments = ref<Comment[]>([]);
+  const deletedCommentAuthor = ref("");
 
   const isExpanded = ref<Record<number, boolean>>({});
   const isModalOpen = ref(false);
@@ -100,6 +102,9 @@
 
   const deleteAndFetchData = async (id: string) => {
     try {
+      deletedCommentAuthor.value = comments.value.find(
+        (comment) => comment.id === id
+      )?.author as string;
       isModalOpen.value = true;
       await useDelete(id);
       fetchData();
