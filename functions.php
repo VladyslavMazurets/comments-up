@@ -60,7 +60,6 @@ function get_comments_for_post() {
                     'id'      => $comment->comment_ID,
                     'content' => $comment->comment_content,
                     'author'  => $comment->comment_author,
-                    'email'   => $comment->comment_author_email,
                     'date'    => $comment->comment_date,
                 );
             }

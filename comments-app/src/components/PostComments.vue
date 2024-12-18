@@ -16,18 +16,13 @@
           >
             <div class="flex flex-col">
               <span class="text-lg leading-6">
-                {{ comment.author }}
+                <strong> Name:</strong> {{ comment.author }}
               </span>
-              <a
-                :href="`mailto:${comment.email}`"
-                target="_blank"
-                class="text-sm text-gray-700"
-                >{{ comment.email }}
-              </a>
             </div>
 
             <div class="flex flex-col gap-6">
               <div>
+                <strong>Comment: </strong>
                 <span class="text-base">
                   {{
                     isExpanded[key]
@@ -58,25 +53,7 @@
             </div>
           </div>
         </div>
-
-        <form
-          @submit.prevent="publishComment"
-          class="flex w-2/5 flex-col gap-2"
-        >
-          <label for="username">Add your name</label>
-          <input id="username" v-model="newCommentName" type="name" required />
-          <label for="comment-area">Add your comment</label>
-          <textarea
-            v-model="newCommentContent"
-            id="comment-area"
-            name="comment"
-            maxlength="200"
-            rows="4"
-            class="m-0 resize-none p-1"
-            required
-          ></textarea>
-          <button type="submit" class="bg-sky-400 px-4 py-2">Submit</button>
-        </form>
+        <CommentForm @fetch-data="fetchData()" class="mt-6" />
       </div>
 
       <DeleteModal
@@ -91,12 +68,9 @@
   import dayjs from "dayjs";
   import { onMounted, ref, watchEffect } from "vue";
 
-  import {
-    useDelete,
-    useFetch,
-    useSubmitComment,
-  } from "../hooks/useCommentActions.vue";
+  import { useDelete, useFetch } from "../hooks/useCommentActions.vue";
   import { Comment } from "../vite-env";
+  import CommentForm from "./CommentForm.vue";
   import DeleteModal from "./DeleteModal.vue";
   import NotFound from "./NotFound.vue";
 
@@ -104,9 +78,6 @@
 
   const isExpanded = ref<Record<number, boolean>>({});
   const isModalOpen = ref(false);
-
-  const newCommentName = ref("");
-  const newCommentContent = ref("");
 
   const isTruncated = (text: string): boolean => {
     return text.length > 180;
@@ -120,8 +91,6 @@
     isExpanded.value[key] = !isExpanded.value[key];
   };
 
-  const { submitComment, isSubmitting, errorMessage } = useSubmitComment();
-
   const { data, error, fetchData } = useFetch({
     params: {
       action: "get_comments",
@@ -129,7 +98,7 @@
     },
   });
 
-  const deleteAndFetchData = async (id: number) => {
+  const deleteAndFetchData = async (id: string) => {
     try {
       isModalOpen.value = true;
       await useDelete(id);
@@ -148,22 +117,4 @@
       comments.value = data.value;
     }
   });
-
-  const publishComment = async () => {
-    if (newCommentContent.value.trim() === "") return;
-
-    try {
-      const postId = 64;
-      await submitComment(postId, {
-        name: newCommentName.value,
-        content: newCommentContent.value,
-        date: dayjs().toISOString(),
-      });
-      fetchData();
-      newCommentContent.value = "";
-      newCommentName.value = "";
-    } catch (error) {
-      console.error("Error submitting comment:", error);
-    }
-  };
 </script>
